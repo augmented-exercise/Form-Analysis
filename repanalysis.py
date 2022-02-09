@@ -238,13 +238,12 @@ def lti(accel):
     dumbbell bench press.
     """
     interval = 0.01
-    lowfreq = 0.3 # Avoid accel drift
-    highfreq = 100 # Elminate noise
-    accel += 9.81
-    n = 10
-    print(accel)
-    accel = np.convolve(accel, gauss(2*n+1, n))
-    num, dem = scipy.signal.butter(4, [lowfreq, highfreq], 'bandpass', interval)
+    lowfreq = 2*math.pi*1/math.sqrt(10) # Avoid accel drift
+    highfreq = 1000*2*math.pi # Elminate noise
+    # n = 10
+    # accel = np.convolve(accel, gauss(2*n+1, n))
+    # num, dem = scipy.signal.butter(4, [lowfreq, highfreq], 'bandpass', interval)
+    num, dem = scipy.signal.butter(4, lowfreq, 'highpass', interval)
     bandpass = scipy.signal.lti(num, dem)
     times = np.linspace(0, interval*len(accel), len(accel))
     t, out, _ = bandpass.output(accel, times)
@@ -252,7 +251,9 @@ def lti(accel):
     t2, out2, _ = bandpass.output(integral, times)
     plt.figure("LTI response")
     # plt.plot(out)
-    plt.plot(out2)
+    plt.plot(accel)
+    plt.plot(out)
+    # plt.plot(out2)
 
 def peak_tracker(accel, reverse=False, figname=None):
     "Attempt to identify start and end of repetitions using peak tracking"
@@ -320,7 +321,7 @@ def divide(filename, exercise_name, form_name, subject=None, reverse=False):
     # In future we should find the best axis
     accel_x_vec = accel_interp.x.to_numpy()
     # demo_fft(accel_x_vec, "Whole fft") # Debugging
-    # lti(accel_x_vec)
+    lti(accel_x_vec)
     if PLOTTING:
         plt.figure("Input data")
         plt.plot(accel_x_vec-9.81)
@@ -329,8 +330,8 @@ def divide(filename, exercise_name, form_name, subject=None, reverse=False):
     figname = os.path.join("images", f'{exercise_name}-{form_name}')
     if subject:
         figname += f'-{subject}'
-    # peaks = integrate(reps, reverse=reverse, figname=figname)
-    peaks = peak_tracker(reps, reverse=reverse, figname=figname)
+    peaks = integrate(reps, reverse=reverse, figname=figname)
+    # peaks = peak_tracker(reps, reverse=reverse, figname=figname)
     peaks += start # Account for offset to start of exercise
     extra_label = ""
     if subject:
@@ -354,9 +355,9 @@ def main():
     # file, reverse = "data/test2", False # Tejus 2
     # file, reverse = "data/Wed Feb 02 16:32:47 MST 2022", False # Should press wide - Zach
     # file, reverse = "data/Wed Feb 02 17:10:29 MST 2022", False # Tricep pushdown - Zach
-    # file, reverse = "data/Wed Feb 02 17:13:30 MST 2022", False # Tricep pushdown - Zach
+    file, reverse = "data/Wed Feb 02 17:13:30 MST 2022", False # Tricep pushdown - Zach
     # file, reverse = "data/Wed Feb 02 16:59:42 MST 2022", False # Lateral raise - Zach
-    file, reverse = "data/Wed Feb 02 16:14:33 MST 2022", False # Curl - Tejus
+    # file, reverse = "data/Wed Feb 02 16:14:33 MST 2022", False # Curl - Tejus
 
     divide(file, "test", "test", reverse)
     # Show any plots made during any of the called functions
