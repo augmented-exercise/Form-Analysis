@@ -3,7 +3,6 @@
 Grab information from google sheets before performing rep analysis
 """
 from __future__ import print_function
-from audioop import reverse
 
 import os.path
 
