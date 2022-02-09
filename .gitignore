@@ -1,2 +1,7 @@
 data/
 .vscode/
+images/
+repdata/
+__pycache__/
+credentials.json
+token.json
