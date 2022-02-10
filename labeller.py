@@ -26,7 +26,7 @@ def convert_to_dict(arr):
 
 def label(filename, tags):
     """
-    Label a singel file
+    Label a single file
 
     tags: list of table entries containing about the files
     """
